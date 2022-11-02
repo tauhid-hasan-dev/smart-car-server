@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -22,6 +22,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const serviceCollection = client.db('smartCar').collection('services');
+        const ordersCollection = client.db('smartCar').collection('orders');
 
         app.get('/services', async (req, res) => {
             const query = {};
@@ -30,6 +31,20 @@ async function run() {
             res.send(services);
         })
 
+        app.get('/checkout/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const service = await serviceCollection.findOne(query);
+            res.send(service);
+        })
+
+        //order api
+
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.send(result)
+        })
 
     } finally {
 
