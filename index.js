@@ -20,6 +20,11 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+function verifyJWT(req, res, next) {
+    /* next() */
+    console.log(req.headers.authorization);
+}
+
 async function run() {
     try {
         const serviceCollection = client.db('smartCar').collection('services');
@@ -51,6 +56,7 @@ async function run() {
 
         app.get('/orders', async (req, res) => {
             console.log(req.query)
+            console.log(req.headers.authorization);
             let query = {};
             if (req.query.email) {
                 query = {
@@ -62,7 +68,7 @@ async function run() {
             res.send(orders);
         })
 
-        app.post('/orders', async (req, res) => {
+        app.post('/orders', verifyJWT, async (req, res) => {
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
             res.send(result)
