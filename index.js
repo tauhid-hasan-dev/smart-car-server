@@ -1,5 +1,6 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
+var jwt = require('jsonwebtoken') //to send jwt we need to require jwt. 
 const app = express();
 const cors = require('cors');
 const port = process.env.PORT || 5000;
@@ -23,6 +24,13 @@ async function run() {
     try {
         const serviceCollection = client.db('smartCar').collection('services');
         const ordersCollection = client.db('smartCar').collection('orders');
+
+        app.post('/jwt', (req, res) => {
+            const user = req.body;
+            console.log(user);
+            var token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            res.send({ token }); //here we need to convert the token to an json(object) before sending 
+        })
 
         app.get('/services', async (req, res) => {
             console.log(req.query);
