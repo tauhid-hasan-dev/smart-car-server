@@ -55,15 +55,25 @@ async function run() {
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' })
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '20d' })
             res.send({ token })
         })
 
 
         app.get('/services', async (req, res) => {
-            console.log(req.query);
-            const query = {};
-            const cursor = serviceCollection.find(query);
+            console.log(req.query.search);
+            const search = req.query.search;
+            let query = {}
+            if (search.length) {
+                query = {
+                    $text: {
+                        $search: search
+                    }
+                }
+            }
+            //const query = { price: { $gt: 30, $lt: 300 }, };
+            const order = req.query.order === 'asc' ? 1 : -1;
+            const cursor = serviceCollection.find(query).sort({ price: order });
             const services = await cursor.toArray();
             res.send(services);
         })
